@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.tobias.openorder.OrderActivity"
+    android:background="@mipmap/wallpaper_color">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/categoryLayout"
+        android:background="#4D000000">
+
+    </LinearLayout>
+
+    <GridView
+        android:id="@+id/productsGridView"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:numColumns="5">
+    </GridView>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:id="@+id/productsListView">
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#4D000000">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="SUMME:"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="10dp"/>
+        <TextView
+            android:id="@+id/textview_billprice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="0,00 €"
+            android:textSize="20dp"
+            android:textColor="#ffffff"
+            android:gravity="right"
+            android:layout_marginRight="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_abbrechen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ABBRECHEN"
+            android:textColor="#ffffff"
+            android:background="#CC3333"
+            android:onClick="click_Abbrechen"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="BESTELLEN"
+            android:textColor="#ffffff"
+            android:background="#11EE11"
+            android:onClick="click_Bestellen"/>
+    </LinearLayout>
+
+</LinearLayout>
