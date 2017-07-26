@@ -1,5 +1,7 @@
 package com.example.tobias.openorder.domain;
 
+import android.support.v7.app.AlertDialog;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 
@@ -57,19 +59,20 @@ public class Table implements Serializable {
         }
     }
 
-    public void removeProduct(Product product){
+    public boolean removeProduct(Product product) {
         Product foundProductInList = null;
-        for(int i = 0; i < bill.size(); i++){
+        for(int i = 0; i < bill.size(); i++) {
             Product currentProduct = bill.get(i);
             if(currentProduct.getName() == product.getName()){
                 foundProductInList = currentProduct;
             }
         }
-        if(foundProductInList.getCount() > 1){
+        if(foundProductInList.getCount() > 1) {
             foundProductInList.setCount(foundProductInList.getCount()-1);
-        }
-        else{
+        } else {
             bill.remove(product);
+            return true;
         }
+        return false;
     }
 }

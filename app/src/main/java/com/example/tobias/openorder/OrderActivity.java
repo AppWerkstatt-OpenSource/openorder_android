@@ -35,6 +35,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
     GridView gridView;
     LinkedList<ProductCategory> productCategories = new LinkedList<>();
+    AlertDialog editProductDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,7 +206,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
         View view = inflater.inflate(R.layout.dialog_items, null);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         ImageView button_minus = view.findViewById(R.id.imageview_minus);
         ImageView button_plus = view.findViewById(R.id.imageview_plus);
@@ -215,6 +216,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
         textViewTitle.setText(currentProduct.getName());
         textView.setText(String.valueOf(currentProduct.getCount()));
+        editText.setText(currentProduct.getComment()); //falls schon ein Kommentar vorhanden ist
 
 
         button_plus.setOnClickListener(new Button.OnClickListener(){
@@ -230,10 +232,14 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         button_minus.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View view) {
-                table.removeProduct(product);
+                boolean productDeleted = table.removeProduct(product);
                 textView.setText(String.valueOf(currentProduct.getCount()));
                 refreshBillList();
                 getBillPrice();
+
+                if (productDeleted) {
+                    editProductDialog.hide();
+                }
             }
         });
 
@@ -242,7 +248,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         builder.setNegativeButton("ABBRECHEN", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(getApplicationContext(),"ABBRECHEN clicked",Toast.LENGTH_SHORT).show();
+                //close Dialog
             }
         });
         builder.setPositiveButton("BESTÄTIGEN", new DialogInterface.OnClickListener() {
@@ -254,6 +260,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
             }
         });
 
-        builder.create().show();
+        editProductDialog = builder.create();
+        editProductDialog.show();
     }
 }
