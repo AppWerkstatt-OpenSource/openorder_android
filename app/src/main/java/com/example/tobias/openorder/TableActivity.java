@@ -1,11 +1,20 @@
 package com.example.tobias.openorder;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.GridView;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.tobias.openorder.domain.Product;
 import com.example.tobias.openorder.domain.Table;
 import com.example.tobias.openorder.domain.TableGroup;
@@ -14,6 +23,11 @@ import com.example.tobias.openorder.helper.TableGridAdapter;
 import com.example.tobias.openorder.helper.TableListAdapter;
 import com.example.tobias.openorder.helper.TableSelectorInterface;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class TableActivity extends AppCompatActivity implements TableSelectorInterface{
@@ -22,16 +36,23 @@ public class TableActivity extends AppCompatActivity implements TableSelectorInt
     ListView listView;
     boolean activity;
 
+    TableGroup newTableGroup;
+    Table newTable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_table);
         setTitle("Tische");
 
+        //Add tables to xml-file
+        listView = (ListView)findViewById(R.id.table_list);
+
+
         Bundle extras = getIntent().getExtras();
         activity = extras.getBoolean("Bestellen");
         activity = extras.getBoolean("Bezahlen");
-
+/*
         //Add test tablegroups
         TableGroup tableGroup1 = new TableGroup("SAAL");
         tableGroups.add(tableGroup1);
@@ -63,14 +84,42 @@ public class TableActivity extends AppCompatActivity implements TableSelectorInt
         Table table8 = new Table("Tisch 11");
         tableGroup2.getTables().add(table8);
 
-        //Bestellen
-        //Add tables to xml-file
-        listView = (ListView)findViewById(R.id.table_list);
+        reloadTable();
+*/
 
-        final TableListAdapter adapter = new TableListAdapter(getApplicationContext(),tableGroups, this);
-        listView.setAdapter(adapter);
+        //Get data from server
+        final String URL = "http://192.168.0.31:3000/api/TableGroups";
 
-        /*
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, URL, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        tableGroups.clear();
+
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject currentTableGroup = response.getJSONObject(i);
+                                String tableGroupName = currentTableGroup.getString("name");
+                                String tableGroupId = currentTableGroup.getString("id");
+                                loadTable(tableGroupId);
+                                newTableGroup = new TableGroup(tableGroupName, tableGroupId);
+                                tableGroups.add(newTableGroup);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        // Reload table..
+                        reloadTable();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        });
+        Volley.newRequestQueue(this).add(req);
+/*
         //Bezahlen
         if(activity == false){
             //Add tables to xml-file
@@ -86,14 +135,47 @@ public class TableActivity extends AppCompatActivity implements TableSelectorInt
             }
         }
         */
-
-        /*
+/*
         //Add tables to xml-file
         gridView = (GridView)findViewById(R.id.table_GridView);
 
         final TableGridAdapter adapter = new TableGridAdapter(getApplicationContext(), tableGroups);
         gridView.setAdapter(adapter);
         */
+    }
+
+    private void loadTable(String tableGroupId) {
+
+        String url = "http://192.168.0.31:3000/api/TableGroups/" + tableGroupId + "/tables";
+
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject currentTable = response.getJSONObject(i);
+                                String tableName = currentTable.getString("name");
+                                tableGroups.get(1).getTables().add(new Table(tableName));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        reloadTable();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        });
+        Volley.newRequestQueue(this).add(req);
+    }
+
+    private void reloadTable() {
+        //Add tablegroups to TableListAdapter
+        final TableListAdapter adapter = new TableListAdapter(getApplicationContext(), tableGroups, this);
+        listView.setAdapter(adapter);
     }
 
     @Override

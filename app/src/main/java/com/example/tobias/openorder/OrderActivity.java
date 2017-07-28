@@ -16,6 +16,13 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.tobias.openorder.domain.Product;
 import com.example.tobias.openorder.domain.ProductCategory;
 import com.example.tobias.openorder.domain.Table;
@@ -26,6 +33,12 @@ import com.example.tobias.openorder.helper.PixelHelper;
 import com.example.tobias.openorder.helper.ProductAdapterInterface;
 import com.example.tobias.openorder.helper.ProductCategoryImageView;
 import com.example.tobias.openorder.helper.ProductListAdapter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class OrderActivity extends AppCompatActivity implements OrderAdapterInterface, ProductAdapterInterface{
@@ -36,6 +49,10 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
     GridView gridView;
     LinkedList<ProductCategory> productCategories = new LinkedList<>();
     AlertDialog editProductDialog = null;
+
+    //Server helper
+    ProductCategory newProductCatergory;
+    Product newProduct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +69,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
         // Table
         table = new Table("12");
-
+/*
         // Add Demo ProductCategories
         ProductCategory getränke = new ProductCategory("Getränke", R.mipmap.juice_icon);
         productCategories.add(getränke);
@@ -64,6 +81,8 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         productCategories.add(nachspeisen);
         ProductCategory coffee = new ProductCategory("Coffee", R.mipmap.coffee_icon2);
         productCategories.add(coffee);
+        ProductCategory alkohol = new ProductCategory("Alkohol",R.mipmap.beer_icon);
+        productCategories.add(alkohol);
 
         //Add Demo Products
         Product cola = new Product("Cola",2.50);
@@ -127,32 +146,16 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         Product tee = new Product("Tee", 2.50);
         coffee.getProducts().add(tee);
 
+        Product frastanzer = new Product("Frastanzer",3.50);
+        alkohol.getProducts().add(frastanzer);
+        Product spezial = new Product("Spezial",3.50);
+        alkohol.getProducts().add(spezial);
+        Product ginTonic = new Product("GinTonic", 5.50);
+        alkohol.getProducts().add(ginTonic);
 
+*/
         //Add ProductCategories to xml-file
-        LinearLayout categoryLayout = (LinearLayout) findViewById(R.id.categoryLayout);
-
-        for (int i = 0; i < productCategories.size(); i++) {
-            ProductCategory currentCategory = productCategories.get(i);
-
-            final ProductCategoryImageView imageView = new ProductCategoryImageView(this);
-            imageView.setProductCategory(currentCategory);
-            LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,PixelHelper.dpToPixel(70.0f, getApplicationContext()), 1.0f);
-            imageView.setLayoutParams(layout);
-            imageView.setImageResource(currentCategory.getProductImage());
-
-            //OnClick event ProductCategories
-            imageView.setOnClickListener(new TextView.OnClickListener(){
-                public void onClick(View v){
-                    Toast.makeText(getApplicationContext(),imageView.getProductCategory().getName(),Toast.LENGTH_SHORT).show();
-
-                    //Add Products to xml-file
-                    final GridAdapter adapter = new GridAdapter(OrderActivity.this, imageView.getProductCategory(), OrderActivity.this);
-                    gridView.setAdapter(adapter);
-                }
-            });
-
-            categoryLayout.addView(imageView);
-        }
+        loadProductCatergorys();
     }
 
     //Click Event ProductCategory
@@ -262,5 +265,112 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
         editProductDialog = builder.create();
         editProductDialog.show();
+    }
+
+    //Refresh ProductCategorys
+    private void refreshProductCategorys(){
+        LinearLayout categoryLayout = (LinearLayout) findViewById(R.id.categoryLayout);
+
+        for (int i = 0; i < productCategories.size(); i++) {
+            ProductCategory currentCategory = productCategories.get(i);
+
+            final ProductCategoryImageView imageView = new ProductCategoryImageView(this);
+            imageView.setProductCategory(currentCategory);
+            //LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,PixelHelper.dpToPixel(70.0f, getApplicationContext()), 1.0f);
+            LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(PixelHelper.dpToPixel(80,getApplicationContext()),PixelHelper.dpToPixel(70,getApplicationContext()));
+            imageView.setLayoutParams(layout);
+            imageView.setImageResource(R.mipmap.burger_icon);
+
+            //OnClick event ProductCategories
+            imageView.setOnClickListener(new TextView.OnClickListener(){
+                public void onClick(View v){
+                    Toast.makeText(getApplicationContext(),imageView.getProductCategory().getName(),Toast.LENGTH_SHORT).show();
+
+                    //Add Products to xml-file
+                    refreshProducts(imageView);
+                }
+            });
+
+            categoryLayout.addView(imageView);
+        }
+    }
+
+   //Refresh Products
+    private void refreshProducts(ProductCategoryImageView imageView){
+        final GridAdapter adapter = new GridAdapter(OrderActivity.this, imageView.getProductCategory(), OrderActivity.this);
+        gridView.setAdapter(adapter);
+    }
+
+
+
+    //Get ProductCategorys from Server
+    private void loadProductCatergorys(){
+        String url = "http://192.168.0.31:3000/api/ProductCategories";
+
+        JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        productCategories.clear();
+
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject currentProductCategory = response.getJSONObject(i);
+                                String tableGroupName = currentProductCategory.getString("name");
+                                String productImage = currentProductCategory.getString("productImage");
+                                String productCategoryId = currentProductCategory.getString("id");
+                                ProductCategory currentProductCatergory = new ProductCategory(tableGroupName, R.mipmap.juice_icon, productCategoryId);  //Server bringt nur image name und nicht R.id.testPicture
+                                productCategories.add(currentProductCatergory);
+                                loadProducts(currentProductCatergory);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        // Refresh productCategorys
+                        refreshProductCategorys();
+                    }
+                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                VolleyLog.e("Error: ", error.getMessage());
+                            }
+        });
+        Volley.newRequestQueue(this).add(req);
+    }
+
+
+    //Get Products from server
+    private  void loadProducts(final ProductCategory productCategory){
+        String url = "http://192.168.0.31:3000/api/ProductCategories/"+productCategory.getId()+"/products";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        productCategories.clear();
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject currentProduct = response.getJSONObject(i);
+                                String productName = currentProduct.getString("name");
+                                Double price = currentProduct.getDouble("price");
+                                String comment = currentProduct.getString("comment");
+                                Integer count = currentProduct.getInt("count");
+
+                                Product currentProductObj = new Product(productName,price,comment,count);
+                                productCategory.getProducts().add(currentProductObj);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //Refresh products
+                            refreshProductCategorys();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+    });
+        Volley.newRequestQueue(this).add(request);
     }
 }

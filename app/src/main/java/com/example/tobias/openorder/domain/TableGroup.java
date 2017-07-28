@@ -11,9 +11,15 @@ import java.util.List;
 public class TableGroup implements Serializable {
     private String tableGroup;
     private LinkedList<Table> tables = new LinkedList<>();
+    private String id;
 
     public TableGroup(String tableGroup){
         this.tableGroup = tableGroup;
+    }
+
+    public TableGroup(String tableGroup, String id){
+        this.tableGroup = tableGroup;
+        this.id = id;
     }
 
     public TableGroup(String tableGroup, LinkedList tables){
@@ -37,6 +43,10 @@ public class TableGroup implements Serializable {
         }
         return tableCounter;
     }
+
+    //Id
+    public String getId() {return id;}
+    public void setId(String id) {this.id = id;}
 
     public static LinkedList<Table> getAllTables(List<TableGroup> tables) {
         LinkedList<Table> allTables = new LinkedList<>();

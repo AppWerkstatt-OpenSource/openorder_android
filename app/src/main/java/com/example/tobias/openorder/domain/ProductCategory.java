@@ -10,12 +10,14 @@ import java.util.LinkedList;
 public class ProductCategory implements Serializable {
     private String name;
     private int productImage;
+    private String id;
 
     private LinkedList<Product> products = new LinkedList<>();
 
-    public ProductCategory(String name, int productImage) {
+    public ProductCategory(String name, int productImage, String id) {
         this.name = name;
         this.productImage = productImage;
+        this.id = id;
     }
 
     //Name
@@ -41,5 +43,9 @@ public class ProductCategory implements Serializable {
     public void setProductImage(int productImage) {
         this.productImage = productImage;
     }
+
+    //Id
+    public String getId() {return id;}
+    public void setId(String id) {this.id = id;}
 
 }

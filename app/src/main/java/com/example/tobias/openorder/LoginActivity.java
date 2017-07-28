@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -28,6 +29,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void click_LogIn(View view) {
+/*
+        EditText username = (EditText)findViewById(R.id.edittext_username);
+        EditText password = (EditText)findViewById(R.id.edittext_password);
+
         final String URL = "http://192.168.0.31:3000/api/Users/login";
 
         HashMap<String, String> params = new HashMap<String, String>();
@@ -60,5 +65,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         Volley.newRequestQueue(this).add(req);
+*/
+        Intent i = new Intent(getApplicationContext(),HomeActivity.class);
+        startActivity(i);
     }
 }
