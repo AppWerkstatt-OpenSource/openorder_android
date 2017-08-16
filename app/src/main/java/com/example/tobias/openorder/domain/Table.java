@@ -12,24 +12,42 @@ import java.util.LinkedList;
 public class Table implements Serializable {
 
     private String tableNr;
+    private String id;
+    private Boolean isPaid;
     LinkedList<Product> bill = new LinkedList<>();
 
-    public Table(String tableNr) {
+    public Table(String tableNr, String id) {
         this.tableNr = tableNr;
+        this.id = id;
     }
 
-    public Table(String tableNr, LinkedList bill) {
+    public Table(String tableNr, String id, Boolean isPaid){
+        this.tableNr = tableNr;
+        this.id = id;
+        this.isPaid = isPaid;
+    }
+
+    public Table(String tableNr, LinkedList bill, String id) {
         this.tableNr = tableNr;
         this.bill = bill;
+        this.id = id;
     }
 
     //tableNr
     public String getTableNr() {return tableNr;}
     public void setTableNr(String tableNr) {this.tableNr = tableNr;}
 
+    //id
+    public String getId() {return id;}
+    public void setId(String id) {this.id = id;}
+
     //bill
     public LinkedList<Product> getBill() {return bill;}
     public void setBill(LinkedList<Product> bill) {this.bill = bill;}
+
+    //isPaid
+    public Boolean getPaid() {return isPaid;}
+    public void setPaid(Boolean paid) {isPaid = paid;}
 
     //billprice
     public double billTotalPrice()

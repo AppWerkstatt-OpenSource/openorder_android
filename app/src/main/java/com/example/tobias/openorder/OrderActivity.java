@@ -22,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.tobias.openorder.domain.Product;
 import com.example.tobias.openorder.domain.ProductCategory;
@@ -33,6 +34,7 @@ import com.example.tobias.openorder.helper.PixelHelper;
 import com.example.tobias.openorder.helper.ProductAdapterInterface;
 import com.example.tobias.openorder.helper.ProductCategoryImageView;
 import com.example.tobias.openorder.helper.ProductListAdapter;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,121 +43,59 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class OrderActivity extends AppCompatActivity implements OrderAdapterInterface, ProductAdapterInterface{
-
+public class OrderActivity extends AppCompatActivity implements OrderAdapterInterface, ProductAdapterInterface {
     ListView listView;
     Table table;
 
     GridView gridView;
     LinkedList<ProductCategory> productCategories = new LinkedList<>();
     AlertDialog editProductDialog = null;
-
-    //Server helper
-    ProductCategory newProductCatergory;
-    Product newProduct;
+    ProductCategory selecteCategory = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order);
 
+        // Get view components
+        listView = (ListView) findViewById(R.id.productsListView);
+        gridView = (GridView) findViewById(R.id.productsGridView);
+
         setTitle("Bestellung");
 
         //get Table name
-        //Bundle extras = getIntent().getExtras();
-        //table.setTableNr(extras.getString("TableNr"));
+        Intent intent = getIntent();
+        String tableID = intent.getStringExtra("TableID");
+        loadTableFromServer(tableID);
+    }
 
-        gridView = (GridView) findViewById(R.id.productsGridView);
+    //Load Table from Server
+    private void loadTableFromServer(String tableID) {
+        String url = "http://192.168.0.31:3000/api/Tables/" + tableID;
+        JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            String tableId = response.getString("id");
+                            String tableName = response.getString("name");
+                            Boolean isPaid = response.getBoolean("isPaid");
+                            table = new Table(tableName, tableId, isPaid);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
-        // Table
-        table = new Table("12");
-/*
-        // Add Demo ProductCategories
-        ProductCategory getränke = new ProductCategory("Getränke", R.mipmap.juice_icon);
-        productCategories.add(getränke);
-        ProductCategory vorspeisen = new ProductCategory("Vorspeisen", R.mipmap.salat_icon);
-        productCategories.add(vorspeisen);
-        ProductCategory hauptspeisen = new ProductCategory("Hauptspeisen", R.mipmap.burger_icon);
-        productCategories.add(hauptspeisen);
-        ProductCategory nachspeisen = new ProductCategory("Nachspeisen", R.mipmap.ice_icon);
-        productCategories.add(nachspeisen);
-        ProductCategory coffee = new ProductCategory("Coffee", R.mipmap.coffee_icon2);
-        productCategories.add(coffee);
-        ProductCategory alkohol = new ProductCategory("Alkohol",R.mipmap.beer_icon);
-        productCategories.add(alkohol);
-
-        //Add Demo Products
-        Product cola = new Product("Cola",2.50);
-        getränke.getProducts().add(cola);
-        Product sprite = new Product("Sprite",2.50);
-        getränke.getProducts().add(sprite);
-
-        Product salat = new Product("Salat",4.90);
-        vorspeisen.getProducts().add(salat);
-        Product suppe = new Product("Suppe",4.80);
-        vorspeisen.getProducts().add(suppe);
-
-        Product hamburger = new Product("Hamburger",9.80);
-        hauptspeisen.getProducts().add(hamburger);
-        Product schnitzel = new Product("Schnitzel",11.50);
-        hauptspeisen.getProducts().add(schnitzel);
-        Product toast = new Product("Toast",11.20);
-        hauptspeisen.getProducts().add(toast);
-        Product steak = new Product("Toast", 7.60);
-        hauptspeisen.getProducts().add(steak);
-        Product pizza = new Product("Pizza", 8.50);
-        hauptspeisen.getProducts().add(pizza);
-        Product nudeln = new Product("Nudeln",13.20);
-        hauptspeisen.getProducts().add(nudeln);
-        Product huhn = new Product("Huhn", 3.40);
-        hauptspeisen.getProducts().add(huhn);
-        Product spaghetti = new Product("Spaghetti", 7.90);
-        hauptspeisen.getProducts().add(spaghetti);
-        Product zackzack = new Product("ZackZack", 3.50);
-        hauptspeisen.getProducts().add(zackzack);
-        Product wurst = new Product("Wurst", 3.90);
-        hauptspeisen.getProducts().add(wurst);
-        Product burger = new Product("Burger", 6.80);
-        hauptspeisen.getProducts().add(burger);
-        Product test = new Product("Fleisch",5);
-        hauptspeisen.getProducts().add(test);
-        Product test2 = new Product("Fisch",5);
-        hauptspeisen.getProducts().add(test2);
-        Product test3 = new Product("Dorsch",5);
-        hauptspeisen.getProducts().add(test3);
-        Product test4 = new Product("Curry",5);
-        hauptspeisen.getProducts().add(test4);
-        Product test5 = new Product("Veggi",5);
-        hauptspeisen.getProducts().add(test5);
-        Product test6 = new Product("Brot",5);
-        hauptspeisen.getProducts().add(test6);
-        Product test7 = new Product("Sonstiges",5);
-        hauptspeisen.getProducts().add(test7);
-        Product test8 = new Product("Tomaten",5);
-        hauptspeisen.getProducts().add(test8);
-        Product test9 = new Product("LOL",5);
-        hauptspeisen.getProducts().add(test9);
-
-        Product eis = new Product("Eis",5.20);
-        nachspeisen.getProducts().add(eis);
-        Product kuchen = new Product("Kuchen",3.20);
-        nachspeisen.getProducts().add(kuchen);
-
-        Product kaffee = new Product("Kaffee",2.50);
-        coffee.getProducts().add(kaffee);
-        Product tee = new Product("Tee", 2.50);
-        coffee.getProducts().add(tee);
-
-        Product frastanzer = new Product("Frastanzer",3.50);
-        alkohol.getProducts().add(frastanzer);
-        Product spezial = new Product("Spezial",3.50);
-        alkohol.getProducts().add(spezial);
-        Product ginTonic = new Product("GinTonic", 5.50);
-        alkohol.getProducts().add(ginTonic);
-
-*/
-        //Add ProductCategories to xml-file
-        loadProductCatergorys();
+                        //Add ProductCategories to xml-file
+                        loadProductCatergorys();
+                        getBill();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        });
+        Volley.newRequestQueue(this).add(req);
     }
 
     //Click Event ProductCategory
@@ -164,10 +104,6 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
 
         //Add product to Table
         table.addProduct(product);
-
-
-        //Add to list after Click event
-        listView = (ListView)findViewById(R.id.productsListView);
 
         getBillPrice();
 
@@ -179,20 +115,22 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         listView.setAdapter(listAdapter);
     }
 
-    public void getBillPrice(){
-        TextView txtBillprice = (TextView)findViewById(R.id.textview_billprice);
+    public void getBillPrice() {
+        TextView txtBillprice = (TextView) findViewById(R.id.textview_billprice);
         txtBillprice.setText("" + CurrencyHelper.convertToEur(table.billTotalPrice()));
     }
 
     //Button Abbrechen
-    public void click_Abbrechen(View view){
-        Intent i = new Intent(getApplicationContext(),HomeActivity.class);
+    public void click_Abbrechen(View view) {
+        Intent i = new Intent(getApplicationContext(), HomeActivity.class);
         startActivity(i);
     }
 
     //Button Bestellen
-    public void click_Bestellen(View view){
-        Intent i = new Intent(getApplicationContext(),BillActivity.class);
+    public void click_Bestellen(View view) {
+        addBillToServer();
+        table.setPaid(false);
+        Intent i = new Intent(getApplicationContext(), BillActivity.class);
         i.putExtra("Table", table);
         startActivity(i);
     }
@@ -204,7 +142,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         final Product currentProduct = product;
 
         //Create Dialog
-        LayoutInflater inflater = (LayoutInflater)getApplicationContext().getSystemService
+        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService
                 (Context.LAYOUT_INFLATER_SERVICE);
 
         View view = inflater.inflate(R.layout.dialog_items, null);
@@ -222,7 +160,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         editText.setText(currentProduct.getComment()); //falls schon ein Kommentar vorhanden ist
 
 
-        button_plus.setOnClickListener(new Button.OnClickListener(){
+        button_plus.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 table.addProduct(product);
@@ -232,7 +170,7 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
             }
         });
 
-        button_minus.setOnClickListener(new Button.OnClickListener(){
+        button_minus.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 boolean productDeleted = table.removeProduct(product);
@@ -268,8 +206,10 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
     }
 
     //Refresh ProductCategorys
-    private void refreshProductCategorys(){
+    private void refreshProductCategorys() {
         LinearLayout categoryLayout = (LinearLayout) findViewById(R.id.categoryLayout);
+
+        categoryLayout.removeAllViews();
 
         for (int i = 0; i < productCategories.size(); i++) {
             ProductCategory currentCategory = productCategories.get(i);
@@ -277,15 +217,14 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
             final ProductCategoryImageView imageView = new ProductCategoryImageView(this);
             imageView.setProductCategory(currentCategory);
             //LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,PixelHelper.dpToPixel(70.0f, getApplicationContext()), 1.0f);
-            LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(PixelHelper.dpToPixel(80,getApplicationContext()),PixelHelper.dpToPixel(70,getApplicationContext()));
+            LinearLayout.LayoutParams layout = new LinearLayout.LayoutParams(PixelHelper.dpToPixel(80, getApplicationContext()), PixelHelper.dpToPixel(70, getApplicationContext()));
             imageView.setLayoutParams(layout);
             imageView.setImageResource(R.mipmap.burger_icon);
 
             //OnClick event ProductCategories
-            imageView.setOnClickListener(new TextView.OnClickListener(){
-                public void onClick(View v){
-                    Toast.makeText(getApplicationContext(),imageView.getProductCategory().getName(),Toast.LENGTH_SHORT).show();
-
+            imageView.setOnClickListener(new TextView.OnClickListener() {
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), imageView.getProductCategory().getName(), Toast.LENGTH_SHORT).show();
                     //Add Products to xml-file
                     refreshProducts(imageView);
                 }
@@ -295,16 +234,25 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
         }
     }
 
-   //Refresh Products
-    private void refreshProducts(ProductCategoryImageView imageView){
-        final GridAdapter adapter = new GridAdapter(OrderActivity.this, imageView.getProductCategory(), OrderActivity.this);
-        gridView.setAdapter(adapter);
+    //Refresh Products
+    private void refreshProducts(ProductCategoryImageView imageView) {
+        selecteCategory = imageView.getProductCategory();
+        updateProductCategory();
+    }
+
+    private void updateProductCategory() {
+        if (selecteCategory != null) {
+            GridAdapter adapter = new GridAdapter(OrderActivity.this, selecteCategory, OrderActivity.this);
+            gridView.setAdapter(adapter);
+        }
     }
 
 
-
     //Get ProductCategorys from Server
-    private void loadProductCatergorys(){
+    private void loadProductCatergorys() {
+        final AVLoadingIndicatorView loadingBar = (AVLoadingIndicatorView)findViewById(R.id.loadingBar);
+        loadingBar.show();
+
         String url = "http://192.168.0.31:3000/api/ProductCategories";
 
         JsonArrayRequest req = new JsonArrayRequest(Request.Method.GET, url, null,
@@ -326,51 +274,131 @@ public class OrderActivity extends AppCompatActivity implements OrderAdapterInte
                                 e.printStackTrace();
                             }
                         }
+                        loadingBar.hide();
                         // Refresh productCategorys
                         refreshProductCategorys();
                     }
                 }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                VolleyLog.e("Error: ", error.getMessage());
-                            }
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
         });
         Volley.newRequestQueue(this).add(req);
     }
 
 
-    //Get Products from server
-    private  void loadProducts(final ProductCategory productCategory){
-        String url = "http://192.168.0.31:3000/api/ProductCategories/"+productCategory.getId()+"/products";
+    // Get Products from server
+    private void loadProducts(final ProductCategory productCategory) {
+        final AVLoadingIndicatorView loadingBar = (AVLoadingIndicatorView)findViewById(R.id.loadingBar);
+        loadingBar.show();
+        String url = "http://192.168.0.31:3000/api/ProductCategories/" + productCategory.getId() + "/products";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        productCategories.clear();
                         for (int i = 0; i < response.length(); i++) {
                             try {
                                 JSONObject currentProduct = response.getJSONObject(i);
                                 String productName = currentProduct.getString("name");
                                 Double price = currentProduct.getDouble("price");
-                                String comment = currentProduct.getString("comment");
+                                String comment = "";
+                                if (currentProduct.has("comment")) {
+                                    comment = currentProduct.getString("comment");
+                                }
                                 Integer count = currentProduct.getInt("count");
 
-                                Product currentProductObj = new Product(productName,price,comment,count);
+                                Product currentProductObj = new Product(productName, price, comment, count);
                                 productCategory.getProducts().add(currentProductObj);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            //Refresh products
-                            refreshProductCategorys();
                         }
+                        loadingBar.hide();
+                        refreshProductCategorys();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
 
             }
-    });
+        });
         Volley.newRequestQueue(this).add(request);
     }
+
+    int billSaveCounter = 0;
+    //Add Product to Bill
+    private void addBillToServer() {
+        String url = "http://192.168.0.31:3000/api/Tables/" + table.getId() + "/bill";
+
+        billSaveCounter = table.getBill().size();
+        for(int i = 0; i < table.getBill().size(); i++){
+            Product currentProduct = table.getBill().get(i);
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("name", currentProduct.getName());
+                obj.put("price", currentProduct.getPrice());
+                obj.put("comment", currentProduct.getComment());
+                obj.put("count", currentProduct.getCount());
+
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, obj,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                billSaveCounter--;
+
+                                if (billSaveCounter == 0) {
+                                    // Saved all products.
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.e("Error: ", error.getMessage());
+                    }
+                });
+                Volley.newRequestQueue(this).add(request);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //Get Bill from Server
+    private void getBill(){
+        String url = "http://192.168.0.31:3000/api/Tables/"+table.getId()+"/bill";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        table.getBill().clear();
+                        for (int i = 0; i < response.length(); i++) {
+                            try {
+                                JSONObject currentBill = response.getJSONObject(i);
+                                String name = currentBill.getString("name");
+                                Double price = currentBill.getDouble("price");
+                                int count = currentBill.getInt("count");
+                                String comment = currentBill.getString("comment");
+                                Product currentProduct = new Product(name, price, comment, count);
+                                //LinkedList<Product> bill = new LinkedList<>();
+                                //bill.add(currentProduct);
+                                table.getBill().add(currentProduct);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        refreshBillList();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        Volley.newRequestQueue(this).add(request);
+    }
+
 }
+

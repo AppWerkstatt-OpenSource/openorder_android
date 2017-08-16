@@ -69,17 +69,20 @@
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:src="@mipmap/gift_icon"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:onClick="click_coupon"/>
         <ImageView
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:src="@mipmap/creditcard_icon"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:onClick="click_creditCard"/>
         <ImageView
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:src="@mipmap/cash_icon"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:onClick="click_cash"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

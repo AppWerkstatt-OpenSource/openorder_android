@@ -25,7 +25,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void click_Bezahlen(View view){
-        Toast.makeText(getApplicationContext(),"Diese Funktion ist derzeit leider nicht Verfügbar",Toast.LENGTH_LONG).show();
+        Intent i = new Intent(this,TableActivity.class);
+        i.putExtra("Bezahlen", false);
+        startActivity(i);
+        //Toast.makeText(getApplicationContext(),"Diese Funktion ist derzeit leider nicht Verfügbar",Toast.LENGTH_LONG).show();
     }
 
     public void click_Nachricht(View view){

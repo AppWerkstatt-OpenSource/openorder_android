@@ -8,6 +8,14 @@
     tools:context="com.example.tobias.openorder.OrderActivity"
     android:background="@mipmap/wallpaper_color">
 
+    <com.wang.avi.AVLoadingIndicatorView
+        android:id="@+id/loadingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:indicatorName="LineScalePartyIndicator"
+        android:layout_gravity="center"
+        />
+
 
 <HorizontalScrollView
     android:layout_width="match_parent"
